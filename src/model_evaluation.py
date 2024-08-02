@@ -18,20 +18,17 @@ def baseline_accuracy(traingenerator, validgenerator, verbose=False):
 
 def compare_accuracies(baseline_acc, model_acc):
     
-    x_labels = ['Baseline', 'Model']
-    bar_colors = ['#FFDFD3', '#593e67'] # '#957DAD'
+    plt.style.use('ggplot')
+    x_labels = ['Baseline\nMFC', 'Model']
+    bar_colors = ['lightsteelblue', 'midnightblue']
     bars = plt.bar(x_labels, [baseline_acc, model_acc], width=0.3, color=bar_colors)
 
     for bar in bars:
         height = bar.get_height()
         plt.text(bar.get_x() + bar.get_width()/2, height, f'{height:.2f}', ha='center', va='bottom')
 
-    plt.title('Comparison Between Model Accuracy and Baseline Accuracy (= Most Frequent Class)')
+    # plt.title('Comparison of Model Accuracy with Baseline Accuracy (MFC)')
     plt.ylabel('Accuracy')
-    plt.grid(linestyle='dashed')
-    ax = plt.gca()
-    ax.set_axisbelow(True)
-
     plt.show()
 
 

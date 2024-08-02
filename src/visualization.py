@@ -132,6 +132,7 @@ def view_curve(words:List, df, binary=False, gender:str='', multiruns=False, dis
 
 def plot_metrics(train_acc, valid_acc, train_losses, valid_losses):
 
+    plt.style.use('ggplot')
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
     plt.subplots_adjust(hspace=0.5)
 
@@ -144,7 +145,6 @@ def plot_metrics(train_acc, valid_acc, train_losses, valid_losses):
     ax1.set_xlabel('Epochs')
     ax1.set_ylabel('Accuracy')
     ax1.legend()
-    ax1.grid(True, linestyle='--')
 
     # Plot loss
     ax2.set_title('Loss Evolution Over Epochs')
@@ -153,6 +153,5 @@ def plot_metrics(train_acc, valid_acc, train_losses, valid_losses):
     ax2.set_xlabel('Epochs')
     ax2.set_ylabel('Loss')
     ax2.legend()
-    ax2.grid(True, linestyle='--')
 
     plt.show()
