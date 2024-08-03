@@ -6,6 +6,12 @@ from model import GenderLSTM
 
 
 def baseline_accuracy(traingenerator, validgenerator, verbose=False):
+    """
+    Calculate the baseline accuracy of a model based on the most frequent label in the training set.
+
+    This function measures how well a model that always predicts the most frequent label in the 
+    training dataset would perform on the validation set.
+    """
     _, train_labels = list(*traingenerator.generate_batches(len(traingenerator.X)))
     most_frequent_label = max(set(train_labels), key=train_labels.count)   
     
