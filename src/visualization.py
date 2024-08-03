@@ -130,26 +130,26 @@ def view_curve(words:List, df, binary=False, gender:str='', multiruns=False, dis
         plot_prediction_curve(words, words_data, binary=binary, gender=gender, display_probs=display_probs, scale=scale)
 
 
-def plot_metrics(train_acc, valid_acc, train_losses, valid_losses):
+def plot_metrics(accuracies: Dict[str, List], losses: Dict[str, List]):
 
     plt.style.use('ggplot')
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
     plt.subplots_adjust(hspace=0.5)
 
-    n_epochs = range(1, len(valid_losses) + 1)
-
     # Plot accuracy
     ax1.set_title('Accuracy Evolution Over Epochs')
-    ax1.plot(n_epochs, train_acc, marker='o', color='steelblue', label='Training Accuracy')
-    ax1.plot(n_epochs, valid_acc, marker='o', color='orange', label='Validation Accuracy')
+    for name, acc in accuracies.items():
+        n_epochs = range(1, len(acc) + 1)
+        ax1.plot(n_epochs, acc, marker='o', label=name)  # color='steelblue', 'orange
     ax1.set_xlabel('Epochs')
     ax1.set_ylabel('Accuracy')
     ax1.legend()
 
     # Plot loss
     ax2.set_title('Loss Evolution Over Epochs')
-    ax2.plot(n_epochs, train_losses, marker='o', color='steelblue', label='Training Loss')
-    ax2.plot(n_epochs, valid_losses, marker='o', color='orange', label='Validation Loss')
+    for name, loss in losses.items():
+        n_epochs = range(1, len(loss) + 1)
+        ax2.plot(n_epochs, loss, marker='o', label=name)
     ax2.set_xlabel('Epochs')
     ax2.set_ylabel('Loss')
     ax2.legend()

@@ -5,7 +5,7 @@ from data_processing import DataGenerator
 from model import GenderLSTM
 
 
-def baseline_accuracy(traingenerator, validgenerator, verbose=False):
+def baseline_accuracy(traingenerator, testgenerator, verbose=False):
     """
     Calculate the baseline accuracy of a model based on the most frequent label in the training set.
 
@@ -18,14 +18,14 @@ def baseline_accuracy(traingenerator, validgenerator, verbose=False):
     if verbose:
         print(f'The most frequent label in the dataset is: {traingenerator.output_idx2sym[most_frequent_label]}')
 
-    _, dev_labels = list(*validgenerator.generate_batches(len(validgenerator.X)))
-    return dev_labels.count(most_frequent_label) / len(dev_labels)
+    _, test_labels = list(*testgenerator.generate_batches(len(testgenerator.X)))
+    return test_labels.count(most_frequent_label) / len(test_labels)
 
 
 def compare_accuracies(baseline_acc, model_acc):
     
     plt.style.use('ggplot')
-    x_labels = ['Baseline\nMFC', 'Model']
+    x_labels = ['MFC\nBaseline', 'Model']
     bar_colors = ['lightsteelblue', 'midnightblue']
     bars = plt.bar(x_labels, [baseline_acc, model_acc], width=0.3, color=bar_colors)
 
@@ -34,6 +34,7 @@ def compare_accuracies(baseline_acc, model_acc):
         plt.text(bar.get_x() + bar.get_width()/2, height, f'{height:.2f}', ha='center', va='bottom')
 
     # plt.title('Comparison of Model Accuracy with Baseline Accuracy (MFC)')
+    plt.ylim(0, 1)
     plt.ylabel('Accuracy')
     plt.show()
 
