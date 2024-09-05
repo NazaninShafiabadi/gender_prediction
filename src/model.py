@@ -13,12 +13,13 @@ class GenderLSTM(nn.Module):
         super(GenderLSTM, self).__init__()
         self.to(device)
         self.reversed = reversed
+        self.device = torch.device(device)
+        self.pad_idx = datagenerator.input_sym2idx[datagenerator.pad_token]
 
         invocab_size = len(datagenerator.input_idx2sym)
         outvocab_size = len(datagenerator.output_idx2sym)
 
-        self.device = torch.device(device)
-        self.pad_idx = datagenerator.input_sym2idx[datagenerator.pad_token]
+        # Layers
         self.embedding = nn.Embedding(invocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)
         self.fc = nn.Linear(hidden_dim, outvocab_size)
@@ -29,7 +30,7 @@ class GenderLSTM(nn.Module):
         embeds = self.embedding(inputs)
         
         # lstm_out contains the hidden states for each time step in the input sequence for each element in the batch. Shape: [batch_size, sequence_length, hidden_size]
-        # hidden is the hidden state for the last time step in the input sequence for each element in the batch. Shape: [num_layers(* num_directions which is 1 here), batch_size, hidden_size]
+        # hidden is the hidden state for the last time step in the input sequence for each element in the batch. Shape: [num_layers(=1) * num_directions(=1), batch_size, hidden_size]
         lstm_out, (hidden, _) = self.lstm(embeds)   
         
         out_logits = self.fc(lstm_out)   # shape: [batch_size, sequence_length, num_classes] --> these will be used to get accuracy values for each time step

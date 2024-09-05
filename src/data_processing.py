@@ -4,6 +4,13 @@ import random
 from random import shuffle
 
 
+def correct_nasal_vowel_transcripts(transcription):
+    nasal_vowel_map = {'ɑ̃': '1', 'ɔ̃': '2', 'ɛ̃': '3', 'œ̃': '4'}
+    for k, v in nasal_vowel_map.items():
+        transcription = transcription.replace(k, v)
+    return transcription
+
+
 def reverse_sequence(noun):
     return str(noun)[::-1]
 
