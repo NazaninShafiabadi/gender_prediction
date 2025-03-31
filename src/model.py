@@ -8,6 +8,9 @@ from data_processing import reverse_sequence
 
 
 class GenderLSTM(nn.Module):
+    """
+    LSTM-based model for predicting gender from sequences of characters.
+    """
 
     def __init__(self, datagenerator, embedding_dim, hidden_dim, device='cpu', reversed=False):
         super(GenderLSTM, self).__init__()
@@ -46,7 +49,12 @@ class GenderLSTM(nn.Module):
 
     def train_model(self, traingenerator, validgenerator, n_epochs, batch_size, learning_rate=0.001, verbose=True, save_model=False):
         """
+        verbose: If True, prints progress updates.
         save_model must be either False or a string showing the path where the model should be saved.
+
+        Returns:
+            train: Dictionary containing training accuracy and loss history.
+            valid: Dictionary containing validation accuracy and loss history.
         """
         criterion = nn.CrossEntropyLoss(ignore_index=self.pad_idx)
         optimizer = optim.Adam(self.parameters(), lr=learning_rate)
@@ -226,6 +234,9 @@ class GenderLSTM(nn.Module):
 
 
     def predict(self, datagenerator, batch_size, set=str):
+        """
+        Generates predictions using the trained model.
+        """
         predictions = {'Form': [], 'Predicted Gender': [], 'True Gender': [], 'Class Probabilities': [], 'Set': []}
         
         self.eval()
