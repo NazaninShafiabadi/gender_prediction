@@ -1,7 +1,9 @@
 import csv
 import pandas as pd
+import numpy as np
 import random
 from random import shuffle
+from collections import defaultdict
 
 
 def correct_nasal_vowel_transcripts(transcription):
@@ -241,8 +243,8 @@ def most_common(series):
     return series.value_counts().index[0]
 
 
-def get_examples(category, subcat, df, n=5):
-    examples = df[df[category] == subcat]['lemma'].tolist()
+def get_examples(category, subcat, df, form='lemma', n=5):
+    examples = df[df[category] == subcat][form].tolist()
     return random.sample(examples, min(n, len(examples)))
 
 
@@ -262,3 +264,38 @@ def get_category_proportions(data, category):
         print(f"{gender}: {percentage:.1f}% ({count:,})")
 
     print(f"Total: 100% ({gender_counts.sum():,})")
+
+
+
+def get_category_distribution(df, category, form='lemma'):
+    process_counts = df[category].value_counts()
+    total = process_counts.sum()
+    process_percentages = process_counts / total * 100
+    process_distribution = pd.DataFrame({
+        'Count': process_counts,
+        'Percentage': process_percentages,
+        'Examples': process_counts.index.map(lambda x: ', '.join(get_examples(category, x, df, form)))
+    })
+    return process_distribution
+
+
+def get_most_complex_endings(endings):
+    complex_endings = defaultdict(lambda: defaultdict(list))
+    word_to_ending = {}
+
+    # Sort all possible endings by length (longest first)
+    all_endings = sorted(endings.keys(), key=len, reverse=True)
+
+    for ending in all_endings:
+        for gender, words in endings[ending].items():
+            for word in words:
+                if word not in word_to_ending:
+                    complex_endings[ending][gender].append(word)
+                    word_to_ending[word] = ending
+
+    return complex_endings
+
+def calculate_entropy(gender_counts):
+    total = sum(gender_counts.values())
+    probabilities = [count/total for count in gender_counts.values()]
+    return -sum(p * np.log2(p) for p in probabilities if p > 0)
