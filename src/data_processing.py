@@ -3,7 +3,10 @@ import pandas as pd
 import numpy as np
 import random
 from random import shuffle
-from collections import defaultdict
+from collections import Counter, defaultdict
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 
 
 def correct_nasal_vowel_transcripts(transcription):
@@ -299,3 +302,79 @@ def calculate_entropy(gender_counts):
     total = sum(gender_counts.values())
     probabilities = [count/total for count in gender_counts.values()]
     return -sum(p * np.log2(p) for p in probabilities if p > 0)
+
+def extract_edge_ngrams(df, column='phon', n_values=[1, 2, 3]):
+    """
+    Adds columns for initial and final n-grams of sizes specified in `n_values` 
+    for the selected form ('orthographic' or 'phonemic').
+    """
+    for n in n_values:
+        df[f'{column}_init_{n}'] = df[column].apply(lambda x: x[:n] if len(x) >= n else x)
+        df[f'{column}_final_{n}'] = df[column].apply(lambda x: x[-n:] if len(x) >= n else x)
+    return df
+
+def get_top_n_grams(df, column, n_values, top_n=20):
+    init_ngrams = []
+    final_ngrams = []
+
+    for n in n_values:
+        init_ngrams += list(df[f'{column}_init_{n}'])
+        final_ngrams += list(df[f'{column}_final_{n}'])
+   
+    init_counts = pd.Series(init_ngrams).value_counts().head(top_n).sort_values(ascending=True)
+    final_counts = pd.Series(final_ngrams).value_counts().head(top_n).sort_values(ascending=True)
+
+    return init_counts, final_counts
+
+def compare_initial_final_ngrams(df, column='phon', n_values=[1, 2, 3], top_n=20):
+    """
+    Plots and compares initial vs final n-gram distributions for a given form,
+    with the same x-axis scale for both plots for easier comparison.
+
+    """
+    init_counts, final_counts = get_top_n_grams(df, column, n_values, top_n)
+    # Get the maximum value for the x-axis scale
+    max_count = max(init_counts.max(), final_counts.max())
+
+    fig, axs = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
+
+    sns.barplot(x=init_counts.values, y=init_counts.index, ax=axs[0], hue=init_counts.index, palette="Blues_d", legend=False)
+    axs[0].set_title(f'Top {top_n} Initial {", ".join(map(str, n_values))}-grams ({column})')
+    axs[0].set_xlabel('Count')
+    axs[0].set_ylabel('n-gram')
+    axs[0].set_xlim(0, max_count+10)  # Set the same x-axis limits (+10 for visualization)
+
+    sns.barplot(x=final_counts.values, y=final_counts.index, ax=axs[1], hue=final_counts.index, palette="Greens_d", legend=False)
+    axs[1].set_title(f'Top {top_n} Final {", ".join(map(str, n_values))}-grams ({column})')
+    axs[1].set_xlabel('Count')
+    axs[1].set_xlim(0, max_count+10)  # Set the same x-axis limits (+10 for visualization)
+
+    plt.tight_layout()
+    plt.show()
+
+
+def calculate_ngram_frequencies(df, column_prefix):
+  ngram_freq = {
+    'init': Counter(),
+    'final': Counter()
+  }
+  for n in range(1, 4):  # For 1-grams, 2-grams, and 3-grams
+    init_col = f"{column_prefix}_init_{n}"
+    final_col = f"{column_prefix}_final_{n}"
+    ngram_freq['init'].update(df[init_col])
+    ngram_freq['final'].update(df[final_col])
+  return ngram_freq
+
+def get_ngram_comparison(model_disagreement_df, general_lexicon_df, top_n=20, direction = 'init', column='orth', n_values=[1]):
+  init_counts, final_counts = get_top_n_grams(model_disagreement_df, column, n_values, top_n)
+
+  if direction == 'init':
+    counts = init_counts
+  else:
+    counts = final_counts
+
+  counts_df = pd.DataFrame(counts)
+
+  counts_df['lexicon_frequency'] = counts_df.index.map(general_lexicon_df[direction].get)
+  counts_df['proportion'] = (counts_df['count'] / counts_df['lexicon_frequency']).round(2)
+  return counts_df
