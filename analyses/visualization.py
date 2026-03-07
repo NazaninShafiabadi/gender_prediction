@@ -56,11 +56,15 @@ def plot_prediction_curve(words, words_data, binary=False, gender:str='', displa
                 - List[int]: Custom scaling range
     """
     plt.style.use('ggplot')
-    line_styles = ['-', ':', '--', '-.']
+    # line_styles = ['-', ':', '--', '-.']
+    line_styles = ['-']
     line_colors = ['coral', 'darkslateblue', 'darkgray', 'teal', 'palevioletred', 'rteelblue', 'brown', 'gold']
     styles = [(style, color) for style, color in zip(cycle(line_styles), line_colors)]
     style = 0
     
+    # horizontal line at y = 0.5 to mark the decision boundary
+    plt.axhline(y=0.5, color='gray', linestyle='--', linewidth=1)
+
     for word in words:
         word_predictions = words_data[words_data['Form'] == word]['Class Probabilities'].apply(lambda x: ast.literal_eval(x)).tolist()[0]
         
@@ -106,7 +110,7 @@ def plot_prediction_curve(words, words_data, binary=False, gender:str='', displa
         plt.title('Probability of each gender at each character position')
         plt.ylabel(f'Probability')
     
-    plt.xlabel('Character indices')
+    plt.xlabel('Character position')
     plt.legend()
     plt.show()
 
